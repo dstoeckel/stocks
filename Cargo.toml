@@ -1,0 +1,20 @@
+[package]
+name = "stocks"
+version = "0.1.0"
+authors = ["Daniel Stöckel <daniel+devel@somweyr.de>"]
+build = "build.rs"
+
+[build-dependencies]
+serde_codegen = "^0.8"
+
+[dependencies]
+bodyparser = "*"
+iron = "*"
+logger = "*"
+persistent = "*"
+postgres = "*"
+r2d2 = "*"
+r2d2_postgres = "*"
+router = "*"
+serde = "^0.8"
+serde_json = "^0.8"
