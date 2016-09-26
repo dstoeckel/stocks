@@ -1,0 +1,10 @@
+#[derive(Clone, Serialize)]
+pub struct Location {
+    location_id: i32,
+    name: String
+}
+
+#[derive(Clone, Deserialize)]
+struct BaseLocation {
+    name: String
+}

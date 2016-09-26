@@ -6,8 +6,18 @@ use std::path::Path;
 pub fn main() {
     let out_dir = env::var_os("OUT_DIR").unwrap();
 
-    let src = Path::new("src/routes/user.rs.in");
-    let dst = Path::new(&out_dir).join("user.rs");
+    let files = vec![
+        "user.rs",
+        "item.rs",
+        "location.rs"
+    ];
 
-    serde_codegen::expand(&src, &dst).unwrap();
+    let src_dir = Path::new("src/routes/");
+
+    for f in files {
+        let src = src_dir.join(format!("{}.in", f));
+        let dst = Path::new(&out_dir).join(f);
+
+        serde_codegen::expand(&src, &dst).unwrap();
+    }
 }

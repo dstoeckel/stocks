@@ -1,3 +1,8 @@
+DROP TABLE IF EXISTS items;
+DROP TABLE IF EXISTS item;
+DROP TABLE IF EXISTS shelf;
+DROP TABLE IF EXISTS location;
+DROP TABLE IF EXISTS product;
 DROP TABLE IF EXISTS sessions;
 DROP TABLE IF EXISTS db_users;
 DROP TABLE IF EXISTS users;
@@ -23,7 +28,7 @@ CREATE TABLE sessions (
 	user_id integer REFERENCES users(user_id) NOT NULL PRIMARY KEY,
 	start timestamp NOT NULL DEFAULT(now()),
 	address inet NOT NULL,
-	session_id UUID NOT NULL PRIMARY KEY
+	session_id UUID NOT NULL
 );
 
 CREATE TABLE product (
@@ -32,9 +37,23 @@ CREATE TABLE product (
 	gtin bigint
 );
 
-CREATE TABLE items (
+CREATE TABLE location (
+	location_id serial NOT NULL PRIMARY KEY,
+	name varchar NOT NULL
+);
+
+CREATE TABLE shelf (
+	location_id integer REFERENCES location(location_id) NOT NULL,
+	shelf_id serial NOT NULL PRIMARY KEY,
+	name varchar NOT NULL
+);
+
+CREATE TABLE item (
 	item_id serial NOT NULL PRIMARY KEY,
-	product_id integer REFERENCES products(product_id) NOT NULL,
+	product_id integer REFERENCES product(product_id) NOT NULL,
+	location_id integer REFERENCES location(location_id) NOT NULL,
+	shelf_id integer REFERENCES shelf(shelf_id) NOT NULL,
 	first_added timestamp NOT NULL DEFAULT(now()),
 	last_moved timestamp NOT NULL DEFAULT(now())
 );
+

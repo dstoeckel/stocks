@@ -1,0 +1,26 @@
+#[derive(Clone, Serialize)]
+pub struct Item {
+    item_id: i32,
+    product_id: i32,
+    location_id: i32,
+    shelf_id: i32,
+    first_added: i64,
+    last_moved: i64,
+//    first_added: std::time::Timespec,
+//    last_moved: std::time::Timespec,
+}
+
+#[derive(Clone, Deserialize)]
+struct BaseItem {
+    product_id: i32,
+    location_id: i32,
+    shelf_id: i32,
+}
+
+
+#[derive(Clone, Serialize)]
+struct UnknownItem {
+    message: &'static str,
+    item_id: i32,
+}
+
