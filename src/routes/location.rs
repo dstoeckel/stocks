@@ -1,3 +1,4 @@
+extern crate bodyparser;
 extern crate iron;
 extern crate persistent;
 extern crate postgres;
@@ -51,11 +52,35 @@ pub fn list_shelves(req: &mut Request) -> IronResult<Response> {
 }
 
 pub fn create(req: &mut Request) -> IronResult<Response> {
-    Ok(Response::with((status::InternalServerError, "Not implemented!")))
+    let conn = try!(get_db(req));
+
+    let body = req.get::<bodyparser::Struct<BaseLocation>>();
+
+    let location = match body {
+        Ok(Some(location)) => location,
+        Ok(None) => return Ok(Response::with((status::BadRequest, "No location specified"))),
+        Err(err) => return Err(IronError::new(err, (status::BadRequest, "Could not create location. Did you use a duplicate name?")))
+    };
+
+    let rows = conn.query("INSERT INTO location (name) VALUES ($1) RETURNING *", &[&location.name]);
+
+    match rows {
+        Ok(r) => Ok(Response::with((status::Created, serde_json::to_string(&Location::new(&r.get(0))).unwrap()))),
+        Err(err) => { let s = err.to_string(); Err(IronError::new(err, (status::BadRequest, s))) }
+    }
 }
 
 pub fn delete(req: &mut Request) -> IronResult<Response> {
-    Ok(Response::with((status::InternalServerError, "Not implemented!")))
+    let id = try!(get_id(req));
+    let conn = try!(get_db(req));
+
+    let result = conn.execute("DELETE FROM location WHERE location_id = $1", &[&id]);
+
+    match result {
+        Ok(0) => Ok(Response::with(status::NotFound)),
+        Ok(_) => Ok(Response::with(status::Ok)),
+        Err(err) => Err(IronError::new(err, (status::BadRequest, "Could not delete location."))),
+    }
 }
 
 pub fn update(req: &mut Request) -> IronResult<Response> {

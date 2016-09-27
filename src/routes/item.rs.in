@@ -4,10 +4,8 @@ pub struct Item {
     product_id: i32,
     location_id: i32,
     shelf_id: i32,
-    first_added: i64,
-    last_moved: i64,
-//    first_added: std::time::Timespec,
-//    last_moved: std::time::Timespec,
+    first_added: chrono::DateTime<chrono::UTC>,
+    last_moved: chrono::DateTime<chrono::UTC>,
 }
 
 #[derive(Clone, Deserialize)]

@@ -15,8 +15,8 @@ CREATE TABLE users (
 	surname varchar NOT NULL,
 	auth_method varchar NOT NULL,
 	api_key varchar,
-	last_login timestamp,
-	last_logout timestamp
+	last_login timestamp with time zone,
+	last_logout timestamp with time zone
 );
 
 CREATE TABLE db_users (
@@ -26,7 +26,7 @@ CREATE TABLE db_users (
 
 CREATE TABLE sessions (
 	user_id integer REFERENCES users(user_id) NOT NULL PRIMARY KEY,
-	start timestamp NOT NULL DEFAULT(now()),
+	start timestamp with time zone NOT NULL DEFAULT(now()),
 	address inet NOT NULL,
 	session_id UUID NOT NULL
 );
@@ -39,7 +39,7 @@ CREATE TABLE product (
 
 CREATE TABLE location (
 	location_id serial NOT NULL PRIMARY KEY,
-	name varchar NOT NULL
+	name varchar NOT NULL UNIQUE
 );
 
 CREATE TABLE shelf (
@@ -53,7 +53,7 @@ CREATE TABLE item (
 	product_id integer REFERENCES product(product_id) NOT NULL,
 	location_id integer REFERENCES location(location_id) NOT NULL,
 	shelf_id integer REFERENCES shelf(shelf_id) NOT NULL,
-	first_added timestamp NOT NULL DEFAULT(now()),
-	last_moved timestamp NOT NULL DEFAULT(now())
+	first_added timestamp with time zone NOT NULL DEFAULT(now()),
+	last_moved timestamp with time zone NOT NULL DEFAULT(now())
 );
 

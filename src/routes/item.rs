@@ -6,13 +6,14 @@ extern crate persistent;
 extern crate postgres;
 extern crate serde;
 extern crate serde_json;
+extern crate chrono;
 
 use iron::prelude::*;
 use iron::status;
 use persistent::Read;
 
 use database::StocksDatabase;
-use routes::get_id;
+use routes::{get_db, get_id};
 
 include!(concat!(env!("OUT_DIR"), "/item.rs"));
 
@@ -23,10 +24,8 @@ impl Item {
             product_id: row.get("product_id"),
             location_id: row.get("location_id"),
             shelf_id: row.get("shelf_id"),
-            first_added: 0,
-            last_moved: 0, //FIXME: Proper types
-            //first_added: row.get("first_added"),
-            //last_moved: row.get("last_moved")
+            first_added: row.get("first_added"),
+            last_moved: row.get("last_moved")
         };
     }
 }
@@ -60,7 +59,7 @@ pub fn update(req: &mut Request) -> IronResult<Response> {
 }
 
 pub fn create(req: &mut Request) -> IronResult<Response> {
-    let db = req.get::<Read<StocksDatabase>>().unwrap();
+    let conn = try!(get_db(req));
 
     let body = req.get::<bodyparser::Struct<BaseItem>>();
 
@@ -69,8 +68,6 @@ pub fn create(req: &mut Request) -> IronResult<Response> {
         Ok(None) => return Ok(Response::with((status::BadRequest, "No item specified"))),
         Err(err) => { let s = err.to_string(); return Err(IronError::new(err, (status::BadRequest, s))); }
     };
-
-    let conn = db.get().unwrap();
 
     let rows = conn.query("INSERT INTO item (product_id, shelf_id, location_id) VALUES($1, $2, $3) RETURNING *",
         &[&item.product_id, &item.shelf_id, &item.location_id]
