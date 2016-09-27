@@ -48,12 +48,15 @@ CREATE TABLE shelf (
 	name varchar NOT NULL
 );
 
+CREATE UNIQUE INDEX shelf_loc_id_idx ON shelf (location_id, shelf_id);
+
 CREATE TABLE item (
 	item_id serial NOT NULL PRIMARY KEY,
 	product_id integer REFERENCES product(product_id) NOT NULL,
 	location_id integer REFERENCES location(location_id) NOT NULL,
 	shelf_id integer REFERENCES shelf(shelf_id) NOT NULL,
 	first_added timestamp with time zone NOT NULL DEFAULT(now()),
-	last_moved timestamp with time zone NOT NULL DEFAULT(now())
+	last_moved timestamp with time zone NOT NULL DEFAULT(now()),
+	FOREIGN KEY (location_id, shelf_id) REFERENCES shelf (location_id, shelf_id)
 );
 
