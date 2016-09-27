@@ -29,25 +29,28 @@ pub fn get(req: &mut Request) -> IronResult<Response> {
 
     let response = match rows.len() {
         0 => Response::with((status::NotFound, format!("Unknown location '{}'!", id))),
-        1 => Response::with((status::Ok, serde_json::to_string(&Location::new(&rows.get(0))).unwrap())),
+        1 => {
+            let s = serde_json::to_string(&Location::new(&rows.get(0))).unwrap();
+            Response::with((status::Ok, s))
+        }
         // FIXME: return an error message?
-        _ => Response::with((status::InternalServerError))
+        _ => Response::with((status::InternalServerError)),
     };
 
     Ok(response)
 }
 
-pub fn list_items(req: &mut Request) -> IronResult<Response> {
+pub fn items(req: &mut Request) -> IronResult<Response> {
     let conn = try!(get_db(req));
     let id = try!(get_id(req));
 
     let rows = conn.query("SELECT * FROM item WHERE location_id = $1", &[&id]).unwrap();
-    let items = &rows.iter().map(|x| {Item::new(&x)}).collect::<Vec<_>>();
+    let items = &rows.iter().map(|x| Item::new(&x)).collect::<Vec<_>>();
 
     Ok(Response::with((status::Ok, serde_json::to_string(items).unwrap())))
 }
 
-pub fn list_shelves(req: &mut Request) -> IronResult<Response> {
+pub fn shelves(req: &mut Request) -> IronResult<Response> {
     Ok(Response::with((status::InternalServerError, "Not implemented!")))
 }
 
@@ -59,14 +62,25 @@ pub fn create(req: &mut Request) -> IronResult<Response> {
     let location = match body {
         Ok(Some(location)) => location,
         Ok(None) => return Ok(Response::with((status::BadRequest, "No location specified"))),
-        Err(err) => return Err(IronError::new(err, (status::BadRequest, "Could not create location. Did you use a duplicate name?")))
+        Err(err) => {
+            return Err(IronError::new(err,
+                                      (status::BadRequest,
+                                       "Could not create location. Did you use a duplicate name?")))
+        }
     };
 
-    let rows = conn.query("INSERT INTO location (name) VALUES ($1) RETURNING *", &[&location.name]);
+    let rows = conn.query("INSERT INTO location (name) VALUES ($1) RETURNING *",
+                          &[&location.name]);
 
     match rows {
-        Ok(r) => Ok(Response::with((status::Created, serde_json::to_string(&Location::new(&r.get(0))).unwrap()))),
-        Err(err) => { let s = err.to_string(); Err(IronError::new(err, (status::BadRequest, s))) }
+        Ok(r) => {
+            let s = serde_json::to_string(&Location::new(&r.get(0))).unwrap();
+            Ok(Response::with((status::Created, s)))
+        }
+        Err(err) => {
+            let s = err.to_string();
+            Err(IronError::new(err, (status::BadRequest, s)))
+        }
     }
 }
 

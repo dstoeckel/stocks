@@ -25,14 +25,17 @@ impl Item {
             location_id: row.get("location_id"),
             shelf_id: row.get("shelf_id"),
             first_added: row.get("first_added"),
-            last_moved: row.get("last_moved")
+            last_moved: row.get("last_moved"),
         };
     }
 }
 
 impl UnknownItem {
     fn new(item_id: i32) -> UnknownItem {
-        return UnknownItem{ message: "Unknown item specified.", item_id: item_id};
+        return UnknownItem {
+            message: "Unknown item specified.",
+            item_id: item_id,
+        };
     }
 }
 
@@ -45,10 +48,13 @@ pub fn get(req: &mut Request) -> IronResult<Response> {
     let rows = conn.query("SELECT * FROM item WHERE item_id = $1", &[&id]).unwrap();
 
     let response = match rows.len() {
-        0 => Response::with((status::NotFound, serde_json::to_string(&UnknownItem::new(id)).unwrap())),
+        0 => {
+            let s = serde_json::to_string(&UnknownItem::new(id)).unwrap();
+            Response::with((status::NotFound, s))
+        }
         1 => Response::with((status::Ok, serde_json::to_string(&Item::new(&rows.get(0))).unwrap())),
         // FIXME: return an error message?
-        _ => Response::with((status::InternalServerError))
+        _ => Response::with((status::InternalServerError)),
     };
 
     Ok(response)
@@ -66,20 +72,31 @@ pub fn create(req: &mut Request) -> IronResult<Response> {
     let item = match body {
         Ok(Some(item)) => item,
         Ok(None) => return Ok(Response::with((status::BadRequest, "No item specified"))),
-        Err(err) => { let s = err.to_string(); return Err(IronError::new(err, (status::BadRequest, s))); }
+        Err(err) => {
+            let s = err.to_string();
+            return Err(IronError::new(err, (status::BadRequest, s)));
+        }
     };
 
-    let rows = conn.query("INSERT INTO item (product_id, shelf_id, location_id) VALUES($1, $2, $3) RETURNING *",
-        &[&item.product_id, &item.shelf_id, &item.location_id]
-    );
+    let rows = conn.query("INSERT INTO item (product_id, shelf_id, location_id) VALUES($1, $2, $3) \
+                RETURNING *",
+               &[&item.product_id, &item.shelf_id, &item.location_id]);
 
     match rows {
-        Ok(row) => Ok(if row.len() == 1 {
-            Response::with((status::Created, serde_json::to_string(&Item::new(&row.get(0))).unwrap()))
-        } else {
-            Response::with((status::InternalServerError))
-        }),
-        Err(err) => Err(IronError::new(err, (status::BadRequest, "Could not create item! Are your location, product, and shelf id valid?")))
+        Ok(row) => {
+            Ok(if row.len() == 1 {
+                let s = serde_json::to_string(&Item::new(&row.get(0))).unwrap();
+                Response::with((status::Created, s))
+            } else {
+                Response::with((status::InternalServerError))
+            })
+        }
+        Err(err) => {
+            Err(IronError::new(err,
+                               (status::BadRequest,
+                                "Could not create item! Are your location, product, and shelf id \
+                                 valid?")))
+        }
     }
 }
 
@@ -97,4 +114,3 @@ pub fn delete(req: &mut Request) -> IronResult<Response> {
         Err(err) => Err(IronError::new(err, (status::BadRequest, "Could not delete item."))),
     }
 }
-

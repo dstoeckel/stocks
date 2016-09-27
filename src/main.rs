@@ -41,4 +41,3 @@ fn main() {
     Iron::new(chain).http("localhost:3000").unwrap();
     println!("Terminating");
 }
-
