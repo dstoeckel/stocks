@@ -10,6 +10,7 @@ pub fn main() {
         "user.rs",
         "item.rs",
         "location.rs"
+        "shelf.rs",
     ];
 
     let src_dir = Path::new("src/routes/");

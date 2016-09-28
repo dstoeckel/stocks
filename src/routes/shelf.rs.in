@@ -1,0 +1,12 @@
+#[derive(Clone, Serialize)]
+pub struct Shelf {
+    location_id: i32,
+	shelf_id: i32,
+    name: String
+}
+
+#[derive(Clone, Deserialize)]
+struct BaseShelf {
+    location_id: i32,
+    name: String
+}

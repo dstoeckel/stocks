@@ -13,6 +13,7 @@ use database::{Connection, StocksDatabase};
 pub mod user;
 pub mod item;
 pub mod location;
+pub mod shelf;
 
 pub fn get_id(req: &Request) -> Result<i32, IronError> {
     let router = req.extensions.get::<Router>().unwrap();
@@ -47,6 +48,13 @@ pub fn setup(router: &mut Router) {
     router.delete("/location/:id", location::delete, "loc_delete");
     router.post("/location", location::create, "loc_create");
     router.put("/location/:id", location::update, "loc_update");
+
+    // Shelves
+    router.get("/shelf/:id", shelf::get, "shelf_get");
+    router.get("/shelf/:id/items", shelf::items, "shelf_items");
+    router.delete("/shelf/:id", shelf::delete, "shelf_delete");
+    router.post("/shelf", shelf::create, "shelf_create");
+    router.put("/shelf/:id", shelf::update, "shelf_update");
 
     // Users
     router.post("/user/login", user::login, "user_login");
