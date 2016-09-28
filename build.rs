@@ -7,11 +7,11 @@ pub fn main() {
     let out_dir = env::var_os("OUT_DIR").unwrap();
 
     let files = vec![
-        "user.rs",
         "item.rs",
-        "location.rs"
+        "location.rs",
         "product.rs",
         "shelf.rs",
+        "user.rs",
     ];
 
     let src_dir = Path::new("src/routes/");
