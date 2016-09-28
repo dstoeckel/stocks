@@ -1,6 +1,8 @@
 Stocks - A small-scale logistics managing server
 ================================================
 
+**This is currently in early stages of development and not really usable in production.**
+
 Stocks is a database application that keeps track of your
 grocery stocks (but is not limited to groceries!).
 
