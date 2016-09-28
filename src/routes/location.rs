@@ -9,6 +9,7 @@ use iron::status;
 
 use routes::{get_id, get_db};
 use routes::item::Item;
+use routes::shelf::Shelf;
 
 include!(concat!(env!("OUT_DIR"), "/location.rs"));
 
@@ -51,7 +52,13 @@ pub fn items(req: &mut Request) -> IronResult<Response> {
 }
 
 pub fn shelves(req: &mut Request) -> IronResult<Response> {
-    Ok(Response::with((status::InternalServerError, "Not implemented!")))
+    let conn = try!(get_db(req));
+    let id = try!(get_id(req));
+
+    let rows = conn.query("SELECT * FROM shelf WHERE location_id = $1", &[&id]).unwrap();
+    let shelves = &rows.iter().map(|x| Shelf::new(&x)).collect::<Vec<_>>();
+
+    Ok(Response::with((status::Ok, serde_json::to_string(shelves).unwrap())))
 }
 
 pub fn create(req: &mut Request) -> IronResult<Response> {
