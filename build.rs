@@ -10,6 +10,7 @@ pub fn main() {
         "user.rs",
         "item.rs",
         "location.rs"
+        "product.rs",
         "shelf.rs",
     ];
 

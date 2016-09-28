@@ -1,0 +1,19 @@
+#[derive(Clone, Serialize)]
+pub struct Product {
+    product_id: i32,
+	name: String,
+	gtin: i64
+}
+
+#[derive(Clone, Deserialize)]
+struct BaseProduct {
+	name: String,
+	gtin: i64
+}
+
+#[derive(Clone, Serialize)]
+struct UnknownProduct {
+    message: &'static str,
+    product_id: i32,
+}
+
