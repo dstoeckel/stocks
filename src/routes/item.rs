@@ -2,7 +2,6 @@ extern crate iron;
 
 extern crate router;
 extern crate bodyparser;
-extern crate persistent;
 extern crate postgres;
 extern crate serde;
 extern crate serde_json;
@@ -10,9 +9,7 @@ extern crate chrono;
 
 use iron::prelude::*;
 use iron::status;
-use persistent::Read;
 
-use database::StocksDatabase;
 use routes::{get_db, get_id};
 
 include!(concat!(env!("OUT_DIR"), "/item.rs"));
@@ -40,10 +37,8 @@ impl UnknownItem {
 }
 
 pub fn get(req: &mut Request) -> IronResult<Response> {
-    let db = req.get::<Read<StocksDatabase>>().unwrap();
+    let conn = try!(get_db(req));
     let id = try!(get_id(req));
-
-    let conn = db.get().unwrap();
 
     let rows = conn.query("SELECT * FROM item WHERE item_id = $1", &[&id]).unwrap();
 
@@ -101,10 +96,8 @@ pub fn create(req: &mut Request) -> IronResult<Response> {
 }
 
 pub fn delete(req: &mut Request) -> IronResult<Response> {
-    let db = req.get::<Read<StocksDatabase>>().unwrap();
+    let conn = try!(get_db(req));
     let id = try!(get_id(req));
-
-    let conn = db.get().unwrap();
 
     let result = conn.execute("DELETE FROM item WHERE item_id = $1", &[&id]);
 
